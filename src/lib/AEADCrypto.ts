@@ -1,4 +1,4 @@
-import * as crypto from "crypto";
+import * as crypto from "react-native-crypto";
 import * as semver from "semver";
 
 /**
@@ -33,7 +33,7 @@ export interface AEADEncryptionInterface {
 	) => DecryptionResult;
 }
 
-function encryptNative(
+function encryptNative (
 	mode: "ccm" | "gcm",
 	key: Buffer,
 	iv: Buffer,
@@ -45,19 +45,19 @@ function encryptNative(
 	// prepare encryption
 	const algorithm = `aes-${key.length * 8}-${mode}`;
 	// @ts-ignore The 4th parameter is available starting in NodeJS 10+
-	const cipher = crypto.createCipheriv(algorithm, key, iv, { authTagLength });
+	const cipher = crypto.createCipheriv(algorithm, key, iv, {authTagLength});
 	// @ts-ignore The 2nd parameter is available starting in NodeJS 10+
-	cipher.setAAD(additionalData, { plaintextLength: plaintext.length });
+	cipher.setAAD(additionalData, {plaintextLength: plaintext.length});
 
 	// do encryption
 	const ciphertext = cipher.update(plaintext);
 	cipher.final();
 	const auth_tag = cipher.getAuthTag();
 
-	return { ciphertext, auth_tag };
+	return {ciphertext, auth_tag};
 }
 
-function decryptNative(
+function decryptNative (
 	mode: "ccm" | "gcm",
 	key: Buffer,
 	iv: Buffer,
@@ -69,10 +69,10 @@ function decryptNative(
 	// prepare decryption
 	const algorithm = `aes-${key.length * 8}-${mode}`;
 	// @ts-ignore The 4th parameter is available starting in NodeJS 10+
-	const decipher = crypto.createDecipheriv(algorithm, key, iv, { authTagLength: authTag.length });
+	const decipher = crypto.createDecipheriv(algorithm, key, iv, {authTagLength: authTag.length});
 	decipher.setAuthTag(authTag);
 	// @ts-ignore The 2nd parameter is available starting in NodeJS 10+
-	decipher.setAAD(additionalData, { plaintextLength: ciphertext.length });
+	decipher.setAAD(additionalData, {plaintextLength: ciphertext.length});
 
 	// do decryption
 	const plaintext = decipher.update(ciphertext);
@@ -81,8 +81,8 @@ function decryptNative(
 	try {
 		decipher.final();
 		auth_ok = true;
-	} catch (e) {/* nothing to do */ }
-	return { plaintext, auth_ok };
+	} catch (e) {/* nothing to do */}
+	return {plaintext, auth_ok};
 }
 
 let importedCCM: AEADEncryptionInterface;
@@ -104,7 +104,7 @@ if (semver.satisfies(process.version, ">=10")) {
 
 } else {
 	// import from the node-aead-crypto module
-	({ ccm: importedCCM, gcm: importedGCM } = require("node-aead-crypto"));
+	({ccm: importedCCM, gcm: importedGCM} = require("node-aead-crypto"));
 }
 
 export const ccm = importedCCM || nativeCCM;

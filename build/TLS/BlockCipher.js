@@ -1,19 +1,19 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const crypto = require("crypto");
+Object.defineProperty(exports, "__esModule", {value: true});
+const crypto = require("react-native-crypto");
 const DTLSCiphertext_1 = require("../DTLS/DTLSCiphertext");
 const DTLSCompressed_1 = require("../DTLS/DTLSCompressed");
 const BlockCipherParameters = {
-    "aes-128-cbc": { keyLength: 16, blockSize: 16, recordIvLength: 16 },
-    "aes-256-cbc": { keyLength: 32, blockSize: 16, recordIvLength: 16 },
-    "des-ede3-cbc": { keyLength: 24, blockSize: 8, recordIvLength: 8 },
+    "aes-128-cbc": {keyLength: 16, blockSize: 16, recordIvLength: 16},
+    "aes-256-cbc": {keyLength: 32, blockSize: 16, recordIvLength: 16},
+    "des-ede3-cbc": {keyLength: 24, blockSize: 8, recordIvLength: 8},
 };
 /**
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
  * @param mac - The MAC delegate to be used
  */
-function createCipher(algorithm, mac) {
+function createCipher (algorithm, mac) {
     const cipherParams = BlockCipherParameters[algorithm];
     const ret = ((packet, keyMaterial, connEnd) => {
         // compute the MAC for this packet
@@ -61,10 +61,10 @@ exports.createCipher = createCipher;
  * @param algorithm - The block cipher algorithm to be used
  * @param mac - The MAC delegate to be used
  */
-function createDecipher(algorithm, mac) {
+function createDecipher (algorithm, mac) {
     const decipherParams = BlockCipherParameters[algorithm];
     const ret = ((packet, keyMaterial, connEnd) => {
-        function invalidMAC(deciphered) {
+        function invalidMAC (deciphered) {
             // Even if we have an error, still return some plaintext.
             // This allows to prevent a CBC timing attack
             return {
@@ -102,7 +102,7 @@ function createDecipher(algorithm, mac) {
             // tslint:disable-next-line:no-shadowed-variable
             const plaintext = Buffer.from(deciphered.slice(0, -1 - paddingLength));
             // contains fragment + MAC
-            return { result: plaintext };
+            return {result: plaintext};
         })();
         const sourceConnEnd = (connEnd === "client") ? "server" : "client";
         // then verify the result/MAC

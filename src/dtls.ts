@@ -1,18 +1,14 @@
-﻿import * as dgram from "dgram";
-import { EventEmitter } from "events";
-import { CipherSuites } from "./DTLS/CipherSuites";
-import { FragmentedHandshake } from "./DTLS/Handshake";
-import { ClientHandshakeHandler } from "./DTLS/HandshakeHandler";
-import { RecordLayer } from "./DTLS/RecordLayer";
-import { Alert, AlertDescription, AlertLevel } from "./TLS/Alert";
-import { ChangeCipherSpec } from "./TLS/ChangeCipherSpec";
-import { ContentType } from "./TLS/ContentType";
-import { Message } from "./TLS/Message";
-import { TLSStruct } from "./TLS/TLSStruct";
-
-// enable debug output
-import * as debugPackage from "debug";
-const debug = debugPackage("node-dtls-client");
+﻿import * as dgram from "react-native-udp";
+import {EventEmitter} from "events";
+import {CipherSuites} from "./DTLS/CipherSuites";
+import {FragmentedHandshake} from "./DTLS/Handshake";
+import {ClientHandshakeHandler} from "./DTLS/HandshakeHandler";
+import {RecordLayer} from "./DTLS/RecordLayer";
+import {Alert, AlertDescription, AlertLevel} from "./TLS/Alert";
+import {ChangeCipherSpec} from "./TLS/ChangeCipherSpec";
+import {ContentType} from "./TLS/ContentType";
+import {Message} from "./TLS/Message";
+import {TLSStruct} from "./TLS/TLSStruct";
 
 export namespace dtls {
 
@@ -21,7 +17,7 @@ export namespace dtls {
 	 * @param options - The options used to create the socket
 	 * @param callback - If provided, callback is bound to the "message" event
 	 */
-	export function createSocket(options: Options, callback?: MessageEventHandler): Socket {
+	export function createSocket (options: Options, callback?: MessageEventHandler): Socket {
 		checkOptions(options);
 		const ret = new Socket(options);
 
@@ -42,7 +38,7 @@ export namespace dtls {
 		/**
 		 * INTERNAL USE, DON'T CALL DIRECTLY. use createSocket instead!
 		 */
-		constructor(private options: Options) {
+		constructor (private options: Options) {
 			super();
 			// setup the connection
 			this.udp = dgram
@@ -71,7 +67,7 @@ export namespace dtls {
 		/**
 		 * Send the given data. It is automatically compressed and encrypted.
 		 */
-		public send(data: Buffer, callback?: SendCallback) {
+		public send (data: Buffer, callback?: SendCallback) {
 
 			if (this._isClosed) {
 				throw new Error("The socket is closed. Cannot send data.");
@@ -92,7 +88,7 @@ export namespace dtls {
 		/**
 		 * Closes the connection
 		 */
-		public close(callback?: CloseEventHandler) {
+		public close (callback?: CloseEventHandler) {
 			this.sendAlert(
 				new Alert(AlertLevel.warning, AlertDescription.close_notify),
 				(e) => {
@@ -110,7 +106,7 @@ export namespace dtls {
 		*/
 		private udp: dgram.Socket;
 
-		private udp_onListening() {
+		private udp_onListening () {
 			// connection successful
 			this._udpConnected = true;
 			if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
@@ -132,7 +128,7 @@ export namespace dtls {
 							if (this._connectionTimeout != null) clearTimeout(this._connectionTimeout);
 							this.emit("connected");
 							// also emit all buffered messages
-							for (const { msg, rinfo } of this.bufferedMessages) {
+							for (const {msg, rinfo} of this.bufferedMessages) {
 								this.emit("message", msg.data, rinfo);
 							}
 							this.bufferedMessages = [];
@@ -149,20 +145,20 @@ export namespace dtls {
 		}
 		// is called after the connection timeout expired.
 		// Check the connection and throws if it is not established yet
-		private expectConnection() {
+		private expectConnection () {
 			if (!this._isClosed && !this._udpConnected) {
 				// connection timed out
 				this.killConnection(new Error("The connection timed out"));
 			}
 		}
-		private expectHandshake() {
+		private expectHandshake () {
 			if (!this._isClosed && !this._handshakeFinished) {
 				// handshake timed out
 				this.killConnection(new Error("The DTLS handshake timed out"));
 			}
 		}
 
-		public sendAlert(alert: Alert, callback?: SendCallback): void {
+		public sendAlert (alert: Alert, callback?: SendCallback): void {
 			// send alert to the other party
 			const packet: Message = {
 				type: ContentType.alert,
@@ -171,7 +167,7 @@ export namespace dtls {
 			this.recordLayer.send(packet, callback);
 		}
 
-		private udp_onMessage(udpMsg: Buffer, rinfo: dgram.RemoteInfo) {
+		private udp_onMessage (udpMsg: Buffer, rinfo: dgram.RemoteInfo) {
 			// decode the messages
 			const messages = this.recordLayer.receive(udpMsg);
 
@@ -190,7 +186,6 @@ export namespace dtls {
 						if (alert.level === AlertLevel.fatal) {
 							// terminate the connection when receiving a fatal alert
 							const errorMessage = `received fatal alert: ${AlertDescription[alert.description]}`;
-							debug(errorMessage);
 							this.killConnection(new Error(errorMessage));
 						} else if (alert.level === AlertLevel.warning) {
 							// not sure what to do with most warning alerts
@@ -219,7 +214,7 @@ export namespace dtls {
 		}
 
 		private _isClosed: boolean = false;
-		private udp_onClose() {
+		private udp_onClose () {
 			// we no longer want to receive events
 			this.udp.removeAllListeners();
 			if (!this._isClosed) {
@@ -227,12 +222,12 @@ export namespace dtls {
 				this.emit("close");
 			}
 		}
-		private udp_onError(exception: Error) {
+		private udp_onError (exception: Error) {
 			this.killConnection(exception);
 		}
 
 		/** Kills the underlying UDP connection and emits an error if neccessary */
-		private killConnection(err?: Error) {
+		private killConnection (err?: Error) {
 			if (this._isClosed) return;
 
 			this._isClosed = true;
@@ -259,7 +254,7 @@ export namespace dtls {
 		/** The remote port to connect to */
 		port: number;
 		/** Pre shared key information as a table <identity> => <psk> */
-		psk: { [identity: string]: string };
+		psk: {[identity: string]: string};
 		/** Time after which a connection should successfully established */
 		timeout?: number;
 		// keyContext?: any; // TODO: DTLS-security options
@@ -273,7 +268,7 @@ export namespace dtls {
 	 * Checks if a given object adheres to the Options interface definition
 	 * Throws if it doesn't.
 	 */
-	function checkOptions(opts: Options) {
+	function checkOptions (opts: Options) {
 		if (opts == null) throw new Error("No connection options were given!");
 		if (opts.type !== "udp4" && opts.type !== "udp6") throw new Error(`The connection options must have a "type" property with value "udp4" or "udp6"!`);
 		if (typeof opts.address !== "string" || opts.address.length === 0) throw new Error(`The connection options must contain the remote address as a string!`);

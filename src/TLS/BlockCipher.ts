@@ -1,8 +1,8 @@
-﻿import * as crypto from "crypto";
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import { CipherDelegate, DecipherDelegate, GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
-import { ConnectionEnd } from "./ConnectionState";
+﻿import * as crypto from "react-native-crypto";
+import {DTLSCiphertext} from "../DTLS/DTLSCiphertext";
+import {DTLSCompressed} from "../DTLS/DTLSCompressed";
+import {GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial} from "./CipherSuite";
+import {ConnectionEnd} from "./ConnectionState";
 
 export type BlockCipherAlgorithm =
 	"aes-128-cbc" | "aes-256-cbc" |
@@ -28,10 +28,10 @@ interface BlockCipherParameter {
 	recordIvLength: number;
 }
 
-const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipherParameter } = {
-	"aes-128-cbc": { keyLength: 16, blockSize: 16, recordIvLength: 16 },
-	"aes-256-cbc": { keyLength: 32, blockSize: 16, recordIvLength: 16 },
-	"des-ede3-cbc": { keyLength: 24, blockSize: 8, recordIvLength: 8 },
+const BlockCipherParameters: {[algorithm in BlockCipherAlgorithm]?: BlockCipherParameter} = {
+	"aes-128-cbc": {keyLength: 16, blockSize: 16, recordIvLength: 16},
+	"aes-256-cbc": {keyLength: 32, blockSize: 16, recordIvLength: 16},
+	"des-ede3-cbc": {keyLength: 24, blockSize: 8, recordIvLength: 8},
 };
 
 /**
@@ -39,7 +39,7 @@ const BlockCipherParameters: { [algorithm in BlockCipherAlgorithm]?: BlockCipher
  * @param algorithm - The block cipher algorithm to be used
  * @param mac - The MAC delegate to be used
  */
-export function createCipher(
+export function createCipher (
 	algorithm: BlockCipherAlgorithm,
 	mac: GenericMacDelegate,
 ): BlockCipherDelegate {
@@ -107,7 +107,7 @@ export function createCipher(
  * @param algorithm - The block cipher algorithm to be used
  * @param mac - The MAC delegate to be used
  */
-export function createDecipher(
+export function createDecipher (
 	algorithm: BlockCipherAlgorithm,
 	mac: GenericMacDelegate,
 ): BlockDecipherDelegate {
@@ -115,7 +115,7 @@ export function createDecipher(
 	const decipherParams = BlockCipherParameters[algorithm];
 	const ret = ((packet: DTLSCiphertext, keyMaterial: KeyMaterial, connEnd: ConnectionEnd) => {
 
-		function invalidMAC(deciphered?: Buffer) {
+		function invalidMAC (deciphered?: Buffer) {
 			// Even if we have an error, still return some plaintext.
 			// This allows to prevent a CBC timing attack
 			return {
@@ -158,7 +158,7 @@ export function createDecipher(
 			);
 
 			// contains fragment + MAC
-			return { result: plaintext };
+			return {result: plaintext};
 		})();
 
 		const sourceConnEnd: ConnectionEnd = (connEnd === "client") ? "server" : "client";

@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import * as dgram from "dgram";
+import * as dgram from "react-native-udp";
 import { dtls } from "../dtls";
 import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
 import { ConnectionState } from "../TLS/ConnectionState";

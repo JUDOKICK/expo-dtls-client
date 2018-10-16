@@ -1,12 +1,10 @@
-﻿import * as crypto from "crypto";
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
-import { extend } from "../lib/object-polyfill";
+﻿import {DTLSCiphertext} from "../DTLS/DTLSCiphertext";
+import {DTLSCompressed} from "../DTLS/DTLSCompressed";
 import * as AEADCipher from "./AEADCipher";
 import * as BlockCipher from "./BlockCipher";
-import { ConnectionEnd, ConnectionState } from "./ConnectionState";
-import { HMAC } from "./PRF";
-import { TLSStruct } from "./TLSStruct";
+import {ConnectionEnd} from "./ConnectionState";
+import {HMAC} from "./PRF";
+import {TLSStruct} from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 
 export type HashAlgorithm =
@@ -44,7 +42,7 @@ export interface GenericMacDelegate {
  * Creates a block cipher delegate used to encrypt packet fragments.
  * @param algorithm - The block cipher algorithm to be used
  */
-export function createMAC(
+export function createMAC (
 	algorithm: HashAlgorithm,
 ): GenericMacDelegate {
 
@@ -154,7 +152,7 @@ export interface KeyMaterial {
 }
 
 /** Creates a dummy cipher which is just an identity operation */
-function createNullCipher(): GenericCipherDelegate {
+function createNullCipher (): GenericCipherDelegate {
 	const ret = ((packet: DTLSCompressed, _1, _2) => new DTLSCiphertext(
 		packet.type,
 		packet.version,
@@ -168,7 +166,7 @@ function createNullCipher(): GenericCipherDelegate {
 	return ret;
 }
 /** Creates a dummy decipher which is just an identity operation */
-function createNullDecipher(): GenericDecipherDelegate {
+function createNullDecipher (): GenericDecipherDelegate {
 	const ret = ((packet: DTLSCiphertext, _1, _2) => new DTLSCompressed(
 		packet.type,
 		packet.version,
@@ -182,7 +180,7 @@ function createNullDecipher(): GenericDecipherDelegate {
 	return ret;
 }
 /** Creates a dummy MAC which just returns an empty Buffer */
-function createNullMAC(): GenericMacDelegate {
+function createNullMAC (): GenericMacDelegate {
 	const ret = ((data, _1, _2) => Buffer.from([])) as GenericMacDelegate;
 	ret.keyAndHashLength = 0;
 	return ret;
@@ -196,7 +194,7 @@ export class CipherSuite extends TLSStruct {
 	};
 	public static readonly spec = TypeSpecs.define.Struct(CipherSuite);
 
-	constructor(
+	constructor (
 		public readonly id: number,
 		public readonly keyExchange: KeyExchangeAlgorithm,
 		public readonly macAlgorithm: HashAlgorithm,
@@ -208,18 +206,18 @@ export class CipherSuite extends TLSStruct {
 		super(CipherSuite.__spec);
 	}
 
-	public static createEmpty(): CipherSuite {
+	public static createEmpty (): CipherSuite {
 		return new CipherSuite(null, null, null, null, null);
 	}
 
 	private _cipher: GenericCipherDelegate;
-	public get Cipher(): GenericCipherDelegate {
+	public get Cipher (): GenericCipherDelegate {
 		if (this._cipher == undefined) {
 			this._cipher = this.createCipher();
 		}
 		return this._cipher;
 	}
-	private createCipher(): GenericCipherDelegate {
+	private createCipher (): GenericCipherDelegate {
 		const ret = (() => {
 			switch (this.cipherType) {
 				case null:
@@ -242,7 +240,7 @@ export class CipherSuite extends TLSStruct {
 		if (!ret.recordIvLength) ret.recordIvLength = 0;
 		return ret;
 	}
-	public specifyCipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): CipherDelegate {
+	public specifyCipher (keyMaterial: KeyMaterial, connEnd: ConnectionEnd): CipherDelegate {
 		const ret = (
 			(plaintext: DTLSCompressed) => this.Cipher(plaintext, keyMaterial, connEnd)
 		) as CipherDelegate;
@@ -251,13 +249,13 @@ export class CipherSuite extends TLSStruct {
 	}
 
 	private _decipher: GenericDecipherDelegate;
-	public get Decipher(): GenericDecipherDelegate {
+	public get Decipher (): GenericDecipherDelegate {
 		if (this._decipher == undefined) {
 			this._decipher = this.createDecipher();
 		}
 		return this._decipher;
 	}
-	private createDecipher(): GenericDecipherDelegate {
+	private createDecipher (): GenericDecipherDelegate {
 		const ret = (() => {
 			switch (this.cipherType) {
 				case null:
@@ -280,7 +278,7 @@ export class CipherSuite extends TLSStruct {
 		if (!ret.recordIvLength) ret.recordIvLength = 0;
 		return ret;
 	}
-	public specifyDecipher(keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DecipherDelegate {
+	public specifyDecipher (keyMaterial: KeyMaterial, connEnd: ConnectionEnd): DecipherDelegate {
 		const ret = (
 			(packet: DTLSCiphertext) => this.Decipher(packet, keyMaterial, connEnd)
 		) as DecipherDelegate;
@@ -289,13 +287,13 @@ export class CipherSuite extends TLSStruct {
 	}
 
 	private _mac: GenericMacDelegate;
-	public get MAC(): GenericMacDelegate {
+	public get MAC (): GenericMacDelegate {
 		if (this._mac == undefined) {
 			this._mac = this.createMAC();
 		}
 		return this._mac;
 	}
-	private createMAC(): GenericMacDelegate {
+	private createMAC (): GenericMacDelegate {
 		switch (this.cipherType) {
 			case null:
 			case "aead":

@@ -16,6 +16,7 @@ if (semver.satisfies(process.version, ">=10")) {
 	process.exit(0);
 } else {
 	console.log("  Version < 10, installing node-aead-crypto...");
+	process.exit(0);
 }
 
 // Install node-aead-crypto package on older NodeJS versions

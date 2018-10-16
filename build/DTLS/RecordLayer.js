@@ -1,5 +1,5 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
+Object.defineProperty(exports, "__esModule", {value: true});
 const AntiReplayWindow_1 = require("../TLS/AntiReplayWindow");
 const ConnectionState_1 = require("../TLS/ConnectionState");
 const ContentType_1 = require("../TLS/ContentType");
@@ -7,12 +7,10 @@ const ProtocolVersion_1 = require("../TLS/ProtocolVersion");
 const DTLSCiphertext_1 = require("./DTLSCiphertext");
 const DTLSCompressed_1 = require("./DTLSCompressed");
 const DTLSPlaintext_1 = require("./DTLSPlaintext");
-// enable debug output
-const debugPackage = require("debug");
-const debug = debugPackage("node-dtls-client");
+
 class RecordLayer {
     // TODO: specify connection end
-    constructor(udpSocket, options) {
+    constructor (udpSocket, options) {
         this.udpSocket = udpSocket;
         this.options = options;
         /**
@@ -32,7 +30,7 @@ class RecordLayer {
      * @param msg - The message to be sent
      * @param callback - The function to be called after sending the message.
      */
-    send(msg, callback) {
+    send (msg, callback) {
         const buf = this.processOutgoingMessage(msg);
         this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
     }
@@ -40,10 +38,10 @@ class RecordLayer {
      * Transforms the given message into a DTLSCiphertext packet,
      * does neccessary processing and buffers it up for sending
      */
-    processOutgoingMessage(msg) {
+    processOutgoingMessage (msg) {
         const epoch = this.epochs[this.writeEpochNr];
         let packet = new DTLSPlaintext_1.DTLSPlaintext(msg.type, epoch.connectionState.protocolVersion || RecordLayer.DTLSVersion, this._writeEpochNr, ++epoch.writeSequenceNumber, // sequence number increased by 1
-        msg.data);
+            msg.data);
         // compress packet
         const compressor = (identity) => identity; // TODO: only valid for NULL compression, check it!
         packet = DTLSCompressed_1.DTLSCompressed.compress(packet, compressor);
@@ -63,7 +61,7 @@ class RecordLayer {
      * Sends all messages of a flight in one packet
      * @param messages - The messages to be sent
      */
-    sendFlight(messages, callback) {
+    sendFlight (messages, callback) {
         const buf = Buffer.concat(messages.map(msg => this.processOutgoingMessage(msg)));
         this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
     }
@@ -71,7 +69,7 @@ class RecordLayer {
      * Receives DTLS messages from the given buffer.
      * @param buf The buffer containing DTLSCiphertext packets
      */
-    receive(buf) {
+    receive (buf) {
         let offset = 0;
         let packets = [];
         while (offset < buf.length) {
@@ -86,7 +84,6 @@ class RecordLayer {
             }
             catch (e) {
                 // TODO: cancel connection or what?
-                debug(`Error in RecordLayer.receive: ${e}`);
                 break;
             }
         }
@@ -94,36 +91,36 @@ class RecordLayer {
         const knownEpochs = Object.keys(this.epochs).map(k => +k);
         packets = packets
             .filter(p => {
-            if (!(p.epoch in knownEpochs)) {
-                // discard packets from an unknown epoch
-                // this will keep packets from the upcoming one
-                return false;
-            }
-            else if (p.epoch < this.readEpochNr) {
-                // discard old packets
-                return false;
-            }
-            // discard packets that are not supposed to be received
-            if (!this.epochs[p.epoch].antiReplayWindow.mayReceive(p.sequence_number)) {
-                return false;
-            }
-            // parse the packet
-            return true;
-        });
+                if (!(p.epoch in knownEpochs)) {
+                    // discard packets from an unknown epoch
+                    // this will keep packets from the upcoming one
+                    return false;
+                }
+                else if (p.epoch < this.readEpochNr) {
+                    // discard old packets
+                    return false;
+                }
+                // discard packets that are not supposed to be received
+                if (!this.epochs[p.epoch].antiReplayWindow.mayReceive(p.sequence_number)) {
+                    return false;
+                }
+                // parse the packet
+                return true;
+            });
         // decompress and decrypt packets
         const decompressor = (identity) => identity; // TODO: only valid for NULL compression, check it!
         packets = packets
             .map((p) => {
-            const connectionState = this.epochs[p.epoch].connectionState;
-            try {
-                return connectionState.Decipher(p);
-            }
-            catch (e) {
-                // decryption can fail because of bad MAC etc...
-                // TODO: terminate connection if some threshold is passed (bad_record_mac)
-                return null;
-            }
-        })
+                const connectionState = this.epochs[p.epoch].connectionState;
+                try {
+                    return connectionState.Decipher(p);
+                }
+                catch (e) {
+                    // decryption can fail because of bad MAC etc...
+                    // TODO: terminate connection if some threshold is passed (bad_record_mac)
+                    return null;
+                }
+            })
             .filter(p => p != null) // filter out packets that couldn't be decrypted
             .map(p => p.decompress(decompressor));
         // update the anti replay window
@@ -135,36 +132,36 @@ class RecordLayer {
             data: p.fragment,
         }));
     }
-    get readEpochNr() { return this._readEpochNr; }
+    get readEpochNr () {return this._readEpochNr;}
     /**
      * The current epoch used for reading data
      */
-    get currentReadEpoch() { return this.epochs[this._readEpochNr]; }
-    get nextReadEpoch() { return this.epochs[this._readEpochNr + 1]; }
-    get writeEpochNr() { return this._writeEpochNr; }
+    get currentReadEpoch () {return this.epochs[this._readEpochNr];}
+    get nextReadEpoch () {return this.epochs[this._readEpochNr + 1];}
+    get writeEpochNr () {return this._writeEpochNr;}
     /**
      * The current epoch used for writing data
      */
-    get currentWriteEpoch() { return this.epochs[this._writeEpochNr]; }
-    get nextWriteEpoch() { return this.epochs[this._writeEpochNr + 1]; }
-    get nextEpochNr() {
+    get currentWriteEpoch () {return this.epochs[this._writeEpochNr];}
+    get nextWriteEpoch () {return this.epochs[this._writeEpochNr + 1];}
+    get nextEpochNr () {
         return Math.max(this.readEpochNr, this.writeEpochNr) + 1;
     }
     /**
      * The next read and write epoch that will be used.
      * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
      */
-    get nextEpoch() { return this.epochs[this.nextEpochNr]; }
+    get nextEpoch () {return this.epochs[this.nextEpochNr];}
     /**
      * Ensure there's a next epoch to switch to
      */
-    ensureNextEpoch() {
+    ensureNextEpoch () {
         // makes sure a pending state exists
         if (!this.epochs[this.nextEpochNr]) {
             this.epochs[this.nextEpochNr] = this.createEpoch(this.nextEpochNr);
         }
     }
-    createEpoch(index) {
+    createEpoch (index) {
         return {
             index: index,
             connectionState: new ConnectionState_1.ConnectionState(),
@@ -172,15 +169,15 @@ class RecordLayer {
             writeSequenceNumber: -1,
         };
     }
-    advanceReadEpoch() {
+    advanceReadEpoch () {
         this._readEpochNr++;
         this.ensureNextEpoch();
     }
-    advanceWriteEpoch() {
+    advanceWriteEpoch () {
         this._writeEpochNr++;
         this.ensureNextEpoch();
     }
-    static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD; }
+    static get MAX_PAYLOAD_SIZE () {return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD;}
 }
 /**
  * Maximum transfer unit of the underlying connection.

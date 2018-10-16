@@ -1,18 +1,14 @@
-import * as dgram from "dgram";
-import { dtls } from "../dtls";
-import { AntiReplayWindow } from "../TLS/AntiReplayWindow";
-import { CompressionMethod, ConnectionState } from "../TLS/ConnectionState";
-import { ContentType } from "../TLS/ContentType";
-import { Message } from "../TLS/Message";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { TLSStruct } from "../TLS/TLSStruct";
-import { DTLSCiphertext } from "./DTLSCiphertext";
-import { CompressorDelegate, DecompressorDelegate, DTLSCompressed } from "./DTLSCompressed";
-import { DTLSPlaintext } from "./DTLSPlaintext";
-
-// enable debug output
-import * as debugPackage from "debug";
-const debug = debugPackage("node-dtls-client");
+import * as dgram from "react-native-udp";
+import {dtls} from "../dtls";
+import {AntiReplayWindow} from "../TLS/AntiReplayWindow";
+import {CompressionMethod, ConnectionState} from "../TLS/ConnectionState";
+import {ContentType} from "../TLS/ContentType";
+import {Message} from "../TLS/Message";
+import {ProtocolVersion} from "../TLS/ProtocolVersion";
+import {TLSStruct} from "../TLS/TLSStruct";
+import {DTLSCiphertext} from "./DTLSCiphertext";
+import {CompressorDelegate, DecompressorDelegate, DTLSCompressed} from "./DTLSCompressed";
+import {DTLSPlaintext} from "./DTLSPlaintext";
 
 export interface Epoch {
 	index: number;
@@ -24,7 +20,7 @@ export interface Epoch {
 export class RecordLayer {
 
 	// TODO: specify connection end
-	constructor(private udpSocket: dgram.Socket, private options: dtls.Options) {
+	constructor (private udpSocket: dgram.Socket, private options: dtls.Options) {
 		// initialize with NULL cipherspec
 		// current state
 		this.epochs[0] = this.createEpoch(0);
@@ -37,7 +33,7 @@ export class RecordLayer {
 	 * @param msg - The message to be sent
 	 * @param callback - The function to be called after sending the message.
 	 */
-	public send(msg: Message, callback?: dtls.SendCallback) {
+	public send (msg: Message, callback?: dtls.SendCallback) {
 		const buf = this.processOutgoingMessage(msg);
 		this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
 	}
@@ -45,7 +41,7 @@ export class RecordLayer {
 	 * Transforms the given message into a DTLSCiphertext packet,
 	 * does neccessary processing and buffers it up for sending
 	 */
-	private processOutgoingMessage(msg: Message): Buffer {
+	private processOutgoingMessage (msg: Message): Buffer {
 		const epoch = this.epochs[this.writeEpochNr];
 
 		let packet: DTLSPlaintext | DTLSCompressed | DTLSCiphertext = new DTLSPlaintext(
@@ -80,10 +76,10 @@ export class RecordLayer {
 	 * Sends all messages of a flight in one packet
 	 * @param messages - The messages to be sent
 	 */
-	public sendFlight(messages: Message[], callback?: dtls.SendCallback) {
+	public sendFlight (messages: Message[], callback?: dtls.SendCallback) {
 		const buf = Buffer.concat(
 			messages.map(msg => this.processOutgoingMessage(msg)),
-			);
+		);
 		this.udpSocket.send(buf, 0, buf.length, this.options.port, this.options.address, callback);
 	}
 
@@ -91,7 +87,7 @@ export class RecordLayer {
 	 * Receives DTLS messages from the given buffer.
 	 * @param buf The buffer containing DTLSCiphertext packets
 	 */
-	public receive(buf: Buffer): Message[] {
+	public receive (buf: Buffer): Message[] {
 		let offset = 0;
 		let packets: (DTLSCiphertext | DTLSCompressed | DTLSPlaintext)[] = [];
 		while (offset < buf.length) {
@@ -105,7 +101,6 @@ export class RecordLayer {
 				offset += packet.readBytes;
 			} catch (e) {
 				// TODO: cancel connection or what?
-				debug(`Error in RecordLayer.receive: ${e}`);
 				break;
 			}
 		}
@@ -167,40 +162,40 @@ export class RecordLayer {
 	 */
 	private epochs: Epoch[] = [];
 	private _readEpochNr: number = 0;
-	public get readEpochNr(): number { return this._readEpochNr; }
+	public get readEpochNr (): number {return this._readEpochNr;}
 	/**
 	 * The current epoch used for reading data
 	 */
-	public get currentReadEpoch(): Epoch { return this.epochs[this._readEpochNr]; }
-	public get nextReadEpoch(): Epoch { return this.epochs[this._readEpochNr + 1]; }
+	public get currentReadEpoch (): Epoch {return this.epochs[this._readEpochNr];}
+	public get nextReadEpoch (): Epoch {return this.epochs[this._readEpochNr + 1];}
 
 	private _writeEpochNr: number = 0;
-	public get writeEpochNr(): number { return this._writeEpochNr; }
+	public get writeEpochNr (): number {return this._writeEpochNr;}
 	/**
 	 * The current epoch used for writing data
 	 */
-	public get currentWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr]; }
-	public get nextWriteEpoch(): Epoch { return this.epochs[this._writeEpochNr + 1]; }
+	public get currentWriteEpoch (): Epoch {return this.epochs[this._writeEpochNr];}
+	public get nextWriteEpoch (): Epoch {return this.epochs[this._writeEpochNr + 1];}
 
-	public get nextEpochNr(): number {
+	public get nextEpochNr (): number {
 		return Math.max(this.readEpochNr, this.writeEpochNr) + 1;
 	}
 	/**
 	 * The next read and write epoch that will be used.
 	 * Be careful as this might point to the wrong epoch between ChangeCipherSpec messages
 	 */
-	public get nextEpoch(): Epoch { return this.epochs[this.nextEpochNr]; }
+	public get nextEpoch (): Epoch {return this.epochs[this.nextEpochNr];}
 
 	/**
 	 * Ensure there's a next epoch to switch to
 	 */
-	private ensureNextEpoch() {
+	private ensureNextEpoch () {
 		// makes sure a pending state exists
 		if (!this.epochs[this.nextEpochNr]) {
 			this.epochs[this.nextEpochNr] = this.createEpoch(this.nextEpochNr);
 		}
 	}
-	private createEpoch(index: number): Epoch {
+	private createEpoch (index: number): Epoch {
 		return {
 			index: index,
 			connectionState: new ConnectionState(),
@@ -209,11 +204,11 @@ export class RecordLayer {
 		};
 	}
 
-	public advanceReadEpoch(): void {
+	public advanceReadEpoch (): void {
 		this._readEpochNr++;
 		this.ensureNextEpoch();
 	}
-	public advanceWriteEpoch(): void {
+	public advanceWriteEpoch (): void {
 		this._writeEpochNr++;
 		this.ensureNextEpoch();
 	}
@@ -224,7 +219,7 @@ export class RecordLayer {
 	 */
 	public static MTU: number = 1280;
 	public static readonly MTU_OVERHEAD = 20 + 8;
-	public static get MAX_PAYLOAD_SIZE() { return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD; }
+	public static get MAX_PAYLOAD_SIZE () {return RecordLayer.MTU - RecordLayer.MTU_OVERHEAD;}
 
 	// Default to DTLSv1.2
 	public static DTLSVersion = new ProtocolVersion(~1, ~2);

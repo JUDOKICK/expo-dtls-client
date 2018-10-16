@@ -1,7 +1,7 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-const crypto = require("crypto");
-function HMAC_factory(algorithm, length) {
+Object.defineProperty(exports, "__esModule", {value: true});
+const crypto = require("react-native-crypto");
+function HMAC_factory (algorithm, length) {
     const ret = ((secret, data) => {
         const hmac = crypto.createHmac(algorithm, secret);
         hmac.update(data);
@@ -18,7 +18,7 @@ exports.HMAC = {
     sha384: HMAC_factory("sha384", 48),
     sha512: HMAC_factory("sha512", 64),
 };
-function Hash_factory(algorithm, length) {
+function Hash_factory (algorithm, length) {
     const ret = ((data) => {
         const hash = crypto.createHash(algorithm);
         hash.update(data);
@@ -43,10 +43,10 @@ const Hash = {
  * @param length - The desired amount of data.
  * @see https://tools.ietf.org/html/rfc5246#section-5
  */
-function P(algorithm, secret, seed, length = 32) {
+function P (algorithm, secret, seed, length = 32) {
     const _HMAC = exports.HMAC[algorithm];
     const _A = [seed];
-    function A(i) {
+    function A (i) {
         if (i >= _A.length) {
             // need to generate the value first
             _A.push(_HMAC(secret, A(i - 1)));
@@ -71,7 +71,7 @@ exports.PRF = {
     sha384: PRF_factory("sha384"),
     sha512: PRF_factory("sha512"),
 };
-function PRF_factory(algorithm) {
+function PRF_factory (algorithm) {
     const ret = ((secret, label, seed, length = 32) => {
         return P(algorithm, secret, Buffer.concat([Buffer.from(label, "ascii"), seed]), length);
     });

@@ -1,5 +1,5 @@
-﻿import * as crypto from "crypto";
-import { HashAlgorithm } from "../TLS/CipherSuite";
+﻿import * as crypto from "react-native-crypto";
+import {HashAlgorithm} from "../TLS/CipherSuite";
 
 export interface HMACDelegate {
 	/**
@@ -14,7 +14,7 @@ export interface HMACDelegate {
 	keyAndHashLenth: number;
 }
 
-function HMAC_factory(algorithm: HashAlgorithm, length: number): HMACDelegate {
+function HMAC_factory (algorithm: HashAlgorithm, length: number): HMACDelegate {
 
 	const ret = ((secret: Buffer, data: Buffer) => {
 		const hmac = crypto.createHmac(algorithm, secret);
@@ -50,7 +50,7 @@ export interface HashDelegate {
 	hashLength: number;
 }
 
-function Hash_factory(algorithm: HashAlgorithm, length: number): HashDelegate {
+function Hash_factory (algorithm: HashAlgorithm, length: number): HashDelegate {
 
 	const ret = ((data: Buffer) => {
 		const hash = crypto.createHash(algorithm);
@@ -82,12 +82,12 @@ const Hash: {
  * @param length - The desired amount of data.
  * @see https://tools.ietf.org/html/rfc5246#section-5
  */
-function P(algorithm: HashAlgorithm, secret: Buffer, seed: Buffer, length: number = 32) {
+function P (algorithm: HashAlgorithm, secret: Buffer, seed: Buffer, length: number = 32) {
 
 	const _HMAC = HMAC[algorithm];
 
 	const _A = [seed];
-	function A(i: number) {
+	function A (i: number) {
 		if (i >= _A.length) {
 			// need to generate the value first
 			_A.push(_HMAC(secret, A(i - 1)));
@@ -136,7 +136,7 @@ export const PRF: {
 	sha512: PRF_factory("sha512"),
 };
 
-function PRF_factory(algorithm: HashAlgorithm): PRFDelegate {
+function PRF_factory (algorithm: HashAlgorithm): PRFDelegate {
 
 	const ret = ((secret: Buffer, label: string, seed: Buffer, length: number = 32) => {
 		return P(

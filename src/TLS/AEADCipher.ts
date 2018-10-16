@@ -1,16 +1,16 @@
-﻿import * as crypto from "crypto";
-import { DTLSCiphertext } from "../DTLS/DTLSCiphertext";
-import { DTLSCompressed } from "../DTLS/DTLSCompressed";
+﻿import * as crypto from "react-native-crypto";
+import {DTLSCiphertext} from "../DTLS/DTLSCiphertext";
+import {DTLSCompressed} from "../DTLS/DTLSCompressed";
 import * as BitConverter from "../lib/BitConverter";
-import { ContentType } from "../TLS/ContentType";
-import { ProtocolVersion } from "../TLS/ProtocolVersion";
-import { GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial } from "./CipherSuite";
-import { ConnectionEnd } from "./ConnectionState";
-import { TLSStruct } from "./TLSStruct";
+import {ContentType} from "../TLS/ContentType";
+import {ProtocolVersion} from "../TLS/ProtocolVersion";
+import {GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial} from "./CipherSuite";
+import {ConnectionEnd} from "./ConnectionState";
+import {TLSStruct} from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
-import { Vector } from "./Vector";
+import {Vector} from "./Vector";
 
-import { AEADEncryptionInterface, ccm, gcm } from "../lib/AEADCrypto";
+import {AEADEncryptionInterface, ccm, gcm} from "../lib/AEADCrypto";
 
 export type AEADCipherAlgorithm =
 	"aes-128-ccm" | "aes-256-ccm" |
@@ -56,13 +56,13 @@ interface AEADCipherParameter {
 	recordIvLength: number;
 }
 
-const AEADCipherParameters: {[algorithm in AEADCipherAlgorithm]?: AEADCipherParameter } = {
-	"aes-128-ccm":  { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-	"aes-128-ccm8": { interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-	"aes-256-ccm":  { interface: ccm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-	"aes-256-ccm8": { interface: ccm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8 },
-	"aes-128-gcm":  { interface: gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
-	"aes-256-gcm":  { interface: gcm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16 },
+const AEADCipherParameters: {[algorithm in AEADCipherAlgorithm]?: AEADCipherParameter} = {
+	"aes-128-ccm": {interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16},
+	"aes-128-ccm8": {interface: ccm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8},
+	"aes-256-ccm": {interface: ccm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16},
+	"aes-256-ccm8": {interface: ccm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 8},
+	"aes-128-gcm": {interface: gcm, keyLength: 16, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16},
+	"aes-256-gcm": {interface: gcm, keyLength: 32, blockSize: 16, fixedIvLength: 4, recordIvLength: 8, authTagLength: 16},
 };
 
 class AdditionalData extends TLSStruct {
@@ -75,7 +75,7 @@ class AdditionalData extends TLSStruct {
 		fragment_length: TypeSpecs.uint16,
 	};
 
-	constructor(
+	constructor (
 		public epoch: number,
 		public sequence_number: number,
 		public type: ContentType,
@@ -85,7 +85,7 @@ class AdditionalData extends TLSStruct {
 		super(AdditionalData.__spec);
 	}
 
-	public static createEmpty(): AdditionalData {
+	public static createEmpty (): AdditionalData {
 		return new AdditionalData(null, null, null, null, null);
 	}
 
@@ -95,7 +95,7 @@ class AdditionalData extends TLSStruct {
  * Creates an AEAD cipher delegate used to encrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used
  */
-export function createCipher(
+export function createCipher (
 	algorithm: AEADCipherAlgorithm,
 ): AEADCipherDelegate {
 
@@ -156,7 +156,7 @@ export function createCipher(
  * Creates an AEAD cipher delegate used to decrypt packet fragments.
  * @param algorithm - The AEAD cipher algorithm to be used
  */
-export function createDecipher(
+export function createDecipher (
 	algorithm: AEADCipherAlgorithm,
 ): AEADDecipherDelegate {
 

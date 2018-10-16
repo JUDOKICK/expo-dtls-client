@@ -1,4 +1,4 @@
-﻿const dgram = require("dgram");
+﻿const dgram = require("react-native-udp");
 
 // a real (working) handshake to test our implementation
 const packets = {

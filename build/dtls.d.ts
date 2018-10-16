@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import * as dgram from "dgram";
+import * as dgram from "react-native-udp";
 import { EventEmitter } from "events";
 import { CipherSuites } from "./DTLS/CipherSuites";
 import { Alert } from "./TLS/Alert";

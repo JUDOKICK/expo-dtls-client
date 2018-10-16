@@ -1,3 +1,5 @@
+This is a react native friendly version of [node-dtls-client](https://github.com/AlCalzone/node-dtls-client). All the credit to [AlCalzone](https://github.com/AlCalzone).
+
 # node-dtls-client
 
 [![node](https://img.shields.io/node/v/node-dtls-client.svg) ![npm](https://img.shields.io/npm/v/node-dtls-client.svg)](https://www.npmjs.com/package/node-dtls-client)

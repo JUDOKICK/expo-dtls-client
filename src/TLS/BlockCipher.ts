@@ -1,4 +1,5 @@
-﻿import * as crypto from "react-native-crypto";
+﻿// @ts-ignore
+import * as crypto from "react-native-crypto";
 import {DTLSCiphertext} from "../DTLS/DTLSCiphertext";
 import {DTLSCompressed} from "../DTLS/DTLSCompressed";
 import {GenericCipherDelegate, GenericDecipherDelegate, GenericMacDelegate, KeyMaterial} from "./CipherSuite";

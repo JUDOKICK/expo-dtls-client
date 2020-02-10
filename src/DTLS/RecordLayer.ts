@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as dgram from "react-native-udp";
 import {dtls} from "../dtls";
 import {AntiReplayWindow} from "../TLS/AntiReplayWindow";

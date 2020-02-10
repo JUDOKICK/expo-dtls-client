@@ -1,3 +1,4 @@
+// @ts-ignore
 import * as crypto from "react-native-crypto";
 import * as semver from "semver";
 

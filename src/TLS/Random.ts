@@ -1,4 +1,5 @@
-﻿import * as crypto from "react-native-crypto";
+﻿// @ts-ignore
+import * as crypto from "react-native-crypto";
 import {TLSStruct} from "./TLSStruct";
 import * as TypeSpecs from "./TypeSpecs";
 

@@ -1,4 +1,5 @@
-﻿import * as dgram from "react-native-udp";
+﻿// @ts-ignore
+import * as dgram from "react-native-udp";
 import {EventEmitter} from "events";
 import {CipherSuites} from "./DTLS/CipherSuites";
 import {FragmentedHandshake} from "./DTLS/Handshake";

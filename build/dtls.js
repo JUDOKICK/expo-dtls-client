@@ -1,5 +1,6 @@
 "use strict";
-Object.defineProperty(exports, "__esModule", {value: true});
+Object.defineProperty(exports, "__esModule", { value: true });
+// @ts-ignore
 const dgram = require("react-native-udp");
 const events_1 = require("events");
 const Handshake_1 = require("./DTLS/Handshake");
@@ -8,7 +9,6 @@ const RecordLayer_1 = require("./DTLS/RecordLayer");
 const Alert_1 = require("./TLS/Alert");
 const ContentType_1 = require("./TLS/ContentType");
 const TLSStruct_1 = require("./TLS/TLSStruct");
-
 var dtls;
 (function (dtls) {
     /**
@@ -16,7 +16,7 @@ var dtls;
      * @param options - The options used to create the socket
      * @param callback - If provided, callback is bound to the "message" event
      */
-    function createSocket (options, callback) {
+    function createSocket(options, callback) {
         checkOptions(options);
         const ret = new Socket(options);
         // bind "message" event after the handshake is finished
@@ -35,7 +35,7 @@ var dtls;
         /**
          * INTERNAL USE, DON'T CALL DIRECTLY. use createSocket instead!
          */
-        constructor (options) {
+        constructor(options) {
             super();
             this.options = options;
             this._handshakeFinished = false;
@@ -59,7 +59,7 @@ var dtls;
         /**
          * Send the given data. It is automatically compressed and encrypted.
          */
-        send (data, callback) {
+        send(data, callback) {
             if (this._isClosed) {
                 throw new Error("The socket is closed. Cannot send data.");
             }
@@ -76,14 +76,14 @@ var dtls;
         /**
          * Closes the connection
          */
-        close (callback) {
+        close(callback) {
             this.sendAlert(new Alert_1.Alert(Alert_1.AlertLevel.warning, Alert_1.AlertDescription.close_notify), (e) => {
                 this.udp.close();
                 if (callback)
                     this.once("close", callback);
             });
         }
-        udp_onListening () {
+        udp_onListening() {
             // connection successful
             this._udpConnected = true;
             if (this._connectionTimeout != null)
@@ -107,7 +107,7 @@ var dtls;
                             clearTimeout(this._connectionTimeout);
                         this.emit("connected");
                         // also emit all buffered messages
-                        for (const {msg, rinfo} of this.bufferedMessages) {
+                        for (const { msg, rinfo } of this.bufferedMessages) {
                             this.emit("message", msg.data, rinfo);
                         }
                         this.bufferedMessages = [];
@@ -124,19 +124,19 @@ var dtls;
         }
         // is called after the connection timeout expired.
         // Check the connection and throws if it is not established yet
-        expectConnection () {
+        expectConnection() {
             if (!this._isClosed && !this._udpConnected) {
                 // connection timed out
                 this.killConnection(new Error("The connection timed out"));
             }
         }
-        expectHandshake () {
+        expectHandshake() {
             if (!this._isClosed && !this._handshakeFinished) {
                 // handshake timed out
                 this.killConnection(new Error("The DTLS handshake timed out"));
             }
         }
-        sendAlert (alert, callback) {
+        sendAlert(alert, callback) {
             // send alert to the other party
             const packet = {
                 type: ContentType_1.ContentType.alert,
@@ -144,7 +144,7 @@ var dtls;
             };
             this.recordLayer.send(packet, callback);
         }
-        udp_onMessage (udpMsg, rinfo) {
+        udp_onMessage(udpMsg, rinfo) {
             // decode the messages
             const messages = this.recordLayer.receive(udpMsg);
             // TODO: implement retransmission.
@@ -177,7 +177,7 @@ var dtls;
                     case ContentType_1.ContentType.application_data:
                         if (!this._handshakeFinished) {
                             // if we are still shaking hands, buffer the message until we're done
-                            this.bufferedMessages.push({msg, rinfo});
+                            this.bufferedMessages.push({ msg, rinfo });
                         }
                         else /* finished */ {
                             // else emit the message
@@ -189,7 +189,7 @@ var dtls;
                 }
             }
         }
-        udp_onClose () {
+        udp_onClose() {
             // we no longer want to receive events
             this.udp.removeAllListeners();
             if (!this._isClosed) {
@@ -197,11 +197,11 @@ var dtls;
                 this.emit("close");
             }
         }
-        udp_onError (exception) {
+        udp_onError(exception) {
             this.killConnection(exception);
         }
         /** Kills the underlying UDP connection and emits an error if neccessary */
-        killConnection (err) {
+        killConnection(err) {
             if (this._isClosed)
                 return;
             this._isClosed = true;
@@ -223,7 +223,7 @@ var dtls;
      * Checks if a given object adheres to the Options interface definition
      * Throws if it doesn't.
      */
-    function checkOptions (opts) {
+    function checkOptions(opts) {
         if (opts == null)
             throw new Error("No connection options were given!");
         if (opts.type !== "udp4" && opts.type !== "udp6")

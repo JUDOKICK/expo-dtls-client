@@ -1,4 +1,5 @@
-﻿import * as crypto from "react-native-crypto";
+﻿// @ts-ignore
+import * as crypto from "react-native-crypto";
 import {HashAlgorithm} from "../TLS/CipherSuite";
 
 export interface HMACDelegate {

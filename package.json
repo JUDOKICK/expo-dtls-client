@@ -1,15 +1,15 @@
 {
-  "name": "node-dtls-client",
+  "name": "expo-dtls-client",
   "version": "0.5.4",
-  "description": "DTLS protocol implementation for Node.js written in TypeScript.",
+  "description": "DTLS protocol implementation for Node.js written in TypeScript. Forked from react-native-dtls-client, adapted for Expo",
   "main": "./build/dtls.js",
   "types": "./build/dtls.d.ts",
   "author": {
-    "name": "AlCalzone",
-    "email": "d.griesel@gmx.net"
+    "name": "JUDOKICK",
+    "email": "joshua@smarties.solutions"
   },
   "license": "MIT",
-  "homepage": "https://github.com/AlCalzone/node-dtls-client",
+  "homepage": "https://github.com/JUDOKICK/expo-dtls-client",
   "devDependencies": {
     "@types/chai": "^4.1.3",
     "@types/debug": "0.0.30",
@@ -45,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/AlCalzone/node-dtls-client.git"
+    "url": "git+https://github.com/JUDOKICK/expo-dtls-client.git"
   },
   "scripts": {
     "build": "tsc",
